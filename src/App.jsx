@@ -1,26 +1,35 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import StatCard from "./components/StatCard";
 import WorkoutCard from "./components/WorkoutCard";
 import "./App.css";
 
 function App() {
-  const [workoutCount, setWorkoutCount] = useState(0);
-  const [personalRecords, setPersonalRecords] = useState([
-    { exercise: "Hip thrust", weight: "100kg" },
-    { exercise: "Romanian Deadlift", weight: "60kg" },
-    { exercise: "Shoulder press", weight: "35ccnkg" },
-    { exercise: "Hammer curls", weight: "20kg" },
-  ]);
+  const savedWorkouts = JSON.parse(localStorage.getItem("repforgeWorkouts")) || [];
+  const [workoutCount] = useState(savedWorkouts.length);
+  const [personalRecords] = useState(() => {
+    const records = {};
+    savedWorkouts.forEach((workout) => {
+      workout.exercises.forEach((set) => {
+        const exerciseName = set.exercise;
+        const weight = Number(set.weight) || 0;
 
-  useEffect(() => {
-    const savedWorkouts =
-      JSON.parse(localStorage.getItem("repforgeWorkouts")) || [];
+        if (!records[exerciseName] || weight > records[exerciseName]) {
+          records[exerciseName] = weight;
+        }
+      });
+    });
 
-    setWorkoutCount(savedWorkouts.length);
-  }, []);
+    return Object.entries(records).map(([exercise, weight]) => ({
+      exercise,
+      weight: `${weight}kg`,
+    }));
+  });
 
   return (
-    <main className="app">
+
+
+
+<main className="app">
       <div className="dashboard">
         <h1>RepForge</h1>
         <p>Your workout. Your progress. Your strength.</p>

@@ -1,18 +1,19 @@
-import { useState, useEffect} from "react";
+import { useState } from "react";
 
 function WorkoutCard() {
   const [workoutStarted, setWorkoutStarted] = useState(false);
   const [completedSetIndexes, setCompletedSetIndexes] = useState([]);
   const [setData, setSetData] = useState({});
   const [workoutFinished, setWorkoutFinished] = useState(false);
-  const [savedWorkout, setSavedWorkout] = useState(null);
-  const [workoutHistory, setWorkoutHistory] = useState([]);
+  const [workoutHistory, setWorkoutHistory] = useState(() =>
+    JSON.parse(localStorage.getItem("repforgeWorkouts")) || []
+  );
 
   const workoutSets = [
-    { id: "set-1", label: "Set 1", weight: 40, reps: 10 },
-    { id: "set-2", label: "Set 2", weight: 90, reps: 8 },
-    { id: "set-3", label: "Set 3", weight: 90, reps: 8 },
-    { id: "set-4", label: "Set 4", weight: 110, reps: 6 },
+    { id: "hip-thrust-1", exercise: "Hip Thrust", label: "Set 1" },
+    { id: "hip-thrust-2", exercise: "Hip Thrust", label: "Set 2" },
+    { id: "hip-thrust-3", exercise: "Hip Thrust", label: "Set 3" },
+    { id: "hip-thrust-4", exercise: "Hip Thrust", label: "Set 4" },
   ];
 
   const completeSet = (setId) => {
@@ -56,8 +57,13 @@ const finishWorkout = () => {
     return;
   }
 const workout = {
-  date : new Date().toISOString(),
-  exercises: setData,
+  date: new Date().toISOString(),
+  exercises: workoutSets
+    .filter((set) => completedSetIndexes.includes(set.id))
+    .map((set) => ({
+      ...set,
+      ...setData[set.id],
+    })),
   completedSets: completedSetIndexes,
   totalVolume: calculateVolume()
 };
@@ -72,16 +78,10 @@ localStorage.setItem(
   JSON.stringify(existingWorkouts)
 );
 
+setWorkoutHistory(existingWorkouts);
 setWorkoutFinished(true);
 alert("Workout saved");
 };
-
-  useEffect(() => {
-    const savedData =
-      JSON.parse(localStorage.getItem("repforgeWorkouts")) || [];
-
-    setWorkoutHistory(savedData);
-  }, []);
 
   return (
     <div className="workout-card">
